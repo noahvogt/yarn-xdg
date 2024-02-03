@@ -3,50 +3,49 @@
 # Contributor: Jan Koppe <post@jankoppe.de>
 
 pkgname=yarn-xdg
-pkgver=1.22.19
-pkgrel=2
+pkgver=1.22.21
+pkgrel=1
 pkgdesc='Fast, reliable, and secure dependency management - with xdg basedir patches'
-arch=(any)
 provides=('yarn')
 conflicts=('yarn')
-url='https://classic.yarnpkg.com/'
+arch=('any')
 license=('BSD')
-depends=('nodejs' 'gulp')
-source=("git+https://github.com/yarnpkg/yarn.git"
-        "https://github.com/yarnpkg/yarn/releases/download/v$pkgver/yarn-v$pkgver.tar.gz"
-        "https://github.com/noahvogt/yarn-build-node_modules/releases/download/$pkgver-$pkgrel/yarn-build-node_modules.tar.gz"
-        "use-portable-yarn-executable-for-build.patch"
-        "remove-legacy-yarnrc-path.patch")
-sha512sums=('SKIP'
-            'ff4579ab459bb25aa7c0ff75b62acebe576f6084b36aa842971cf250a5d8c6cd3bc9420b22ce63c7f93a0857bc6ef29291db39c3e7a23aab5adfd5a4dd6c5d71'
-            '11b54551b63fc4047c51acf057c0a121a6957d646d8ac73076b9e43ea73f7145edf3e5cce90b49bbc559d7cbac73654c908ae8cc5720ab5b5f87298c9fe720b0'
-            '15567201dc43d940633751645469d5660fe648643ee532dbfd96621ae4b34590685f4787f0af4a5a3a9b16d99c815e66056103ae41429cd6aa4c0b054349de34'
-            '6f49aa0e56bcee08690f67db760ac6eb3881282a469cefd04052cfe71822c7fa01a9742a9f1a59c7380d45f98c5e922fe9c2ba04ec6b96e58811eed3514f3f2f')
+depends=('nodejs')
+makedepends=('git' 'jq' 'yarn')
+source=("git+https://github.com/${pkgname%-*}pkg/${pkgname%-*}.git#tag=v$pkgver"
+        "remove-legacy-yarnrc-path.patch"
+        "use-portable-yarn-executable-for-build.patch")
+b2sums=('SKIP'
+        '8a02d546bbcef7353887fef2de70061526313370cd3c383e08d5535d4574647b41c1251e3c1c8324944de8a534ec4f6dca9f3014aacc957f18053f7a7517f3b3'
+        'aca7e2d61fac58e484830b42e13d4c6b2a148534f88959c38551c6bd83e5ca4ce6faff1a3ffe0920ffad26aa850c11c32565ffa0fb9b7f415f8c423fefc167a3')
 
 prepare() {
-  cd yarn
-  git checkout 1.22-stable
-  mv "$srcdir/yarn-v$pkgver" "$srcdir/yarn-portable"
-  mv "$srcdir/node_modules" .
-
+  cd ${pkgname%-*}
   patch -p1 -i "$srcdir/use-portable-yarn-executable-for-build.patch"
   patch -p1 -i "$srcdir/remove-legacy-yarnrc-path.patch"
 }
 
 build() {
-  cd yarn
-  ./scripts/build-dist.sh
+  cd ${pkgname%-*}
+  yarn --frozen-lockfile
+  yarn build
 }
 
 package() {
-  cd "$srcdir/yarn"
-  install -dm755  "$pkgdir"/usr/lib/node_modules/yarn
-  cp -R * "$pkgdir"/usr/lib/node_modules/yarn
+  local mod_dir=/usr/lib/node_modules/${pkgname%-*}
+  install -d  "$pkgdir"/{usr/bin,$mod_dir/bin}
+  ln -s $mod_dir/bin/${pkgname%-*}.js "$pkgdir"/usr/bin/${pkgname%-*}
+  ln -s $mod_dir/bin/${pkgname%-*}.js "$pkgdir"/usr/bin/${pkgname%-*}pkg
 
-  install -dm755 "$pkgdir"/usr/bin
-  ln -s /usr/lib/node_modules/yarn/bin/yarn.js "$pkgdir"/usr/bin/yarn
-  ln -s /usr/lib/node_modules/yarn/bin/yarn.js "$pkgdir"/usr/bin/yarnpkg
+  cd ${pkgname%-*}
+  # Prune unnecessary packages
+  cp package.json{,.bak}
+  read -ra devDependencies < <(jq -r '.devDependencies | keys | join(" ")' package.json)
+  yarn remove --frozen-lockfile "${devDependencies[@]}"
+  mv package.json{.bak,}
 
-  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
-  install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+  cp -r lib node_modules package.json "$pkgdir"/$mod_dir
+  install -t "$pkgdir"/$mod_dir/bin bin/${pkgname%-*}.js
+  install -Dm644 -t "$pkgdir"/usr/share/doc/${pkgname%-*} README.md
+  install -Dm644 -t "$pkgdir"/usr/share/licenses/${pkgname%-*} LICENSE
 }
