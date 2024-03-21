@@ -1,19 +1,19 @@
 pkgbase = yarn-xdg
 	pkgdesc = Fast, reliable, and secure dependency management - with xdg basedir patches
-	pkgver = 1.22.21
+	pkgver = 1.22.22
 	pkgrel = 1
 	arch = any
-	license = BSD
+	license = BSD-2-Clause
 	makedepends = git
 	makedepends = jq
 	makedepends = yarn
 	depends = nodejs
 	provides = yarn
 	conflicts = yarn
-	source = git+https://github.com/yarnpkg/yarn.git#tag=v1.22.21
+	source = git+https://github.com/yarnpkg/yarn.git#tag=v1.22.22
 	source = remove-legacy-yarnrc-path.patch
 	source = use-portable-yarn-executable-for-build.patch
-	b2sums = SKIP
+	b2sums = 7099c5c6b409b10717a5d4811e62f79fb3b9cb4a9610d4081032ba2e27d6595a518a72070af3a32389dce44d555c68fc691cbb080b8b58bf8184e347828bde89
 	b2sums = 8a02d546bbcef7353887fef2de70061526313370cd3c383e08d5535d4574647b41c1251e3c1c8324944de8a534ec4f6dca9f3014aacc957f18053f7a7517f3b3
 	b2sums = aca7e2d61fac58e484830b42e13d4c6b2a148534f88959c38551c6bd83e5ca4ce6faff1a3ffe0920ffad26aa850c11c32565ffa0fb9b7f415f8c423fefc167a3
 

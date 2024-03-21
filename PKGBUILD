@@ -3,25 +3,22 @@
 # Contributor: Jan Koppe <post@jankoppe.de>
 
 pkgname=yarn-xdg
-pkgver=1.22.21
+pkgver=1.22.22
 pkgrel=1
 pkgdesc='Fast, reliable, and secure dependency management - with xdg basedir patches'
 provides=('yarn')
 conflicts=('yarn')
 arch=('any')
-license=('BSD')
+license=('BSD-2-Clause')
 depends=('nodejs')
 makedepends=('git' 'jq' 'yarn')
 source=("git+https://github.com/${pkgname%-*}pkg/${pkgname%-*}.git#tag=v$pkgver"
-        "remove-legacy-yarnrc-path.patch"
-        "use-portable-yarn-executable-for-build.patch")
+        "remove-legacy-yarnrc-path.patch")
 b2sums=('SKIP'
-        '8a02d546bbcef7353887fef2de70061526313370cd3c383e08d5535d4574647b41c1251e3c1c8324944de8a534ec4f6dca9f3014aacc957f18053f7a7517f3b3'
-        'aca7e2d61fac58e484830b42e13d4c6b2a148534f88959c38551c6bd83e5ca4ce6faff1a3ffe0920ffad26aa850c11c32565ffa0fb9b7f415f8c423fefc167a3')
+        '8a02d546bbcef7353887fef2de70061526313370cd3c383e08d5535d4574647b41c1251e3c1c8324944de8a534ec4f6dca9f3014aacc957f18053f7a7517f3b3')
 
 prepare() {
   cd ${pkgname%-*}
-  patch -p1 -i "$srcdir/use-portable-yarn-executable-for-build.patch"
   patch -p1 -i "$srcdir/remove-legacy-yarnrc-path.patch"
 }
 
